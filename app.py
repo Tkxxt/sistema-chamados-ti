@@ -3,12 +3,10 @@ import pandas as pd
 import psycopg2
 from datetime import datetime
 import pytz
-
-# Configuração da página
-st.set_page_config(page_title="Sistema de Chamados de TI", page_icon="🎫", layout="wide")
+from zoneinfo import ZoneInfo
 
 # Fuso Horário de Brasília
-FUSO_SP = pytz.timezone("America/Sao_Paulo")
+FUSO_SP = ZoneInfo("America/Sao_Paulo")
 
 if "chamado_para_editar" not in st.session_state:
     st.session_state["chamado_para_editar"] = None
@@ -17,12 +15,15 @@ def get_hora_brasilia():
     return datetime.now(FUSO_SP)
 
 def formatar_data(dt):
-    if pd.notnull(dt):
+    if pd.notnull(dt) and dt != "":
         if isinstance(dt, str):
             dt = pd.to_datetime(dt)
-        # Garante a conversão para o fuso de Brasília se houver informação de timezone
-        if hasattr(dt, 'tz_convert') and dt.tzinfo is not None:
+        
+        if dt.tzinfo is None:
+            dt = dt.tz_localize("UTC").tz_convert(FUSO_SP)
+        else:
             dt = dt.tz_convert(FUSO_SP)
+            
         return dt.strftime("%H:%M - %d/%m/%Y")
     return "Em aberto"
 
