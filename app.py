@@ -212,7 +212,7 @@ if usuario["perfil"] == "tecnico":
                         cursor.execute("""
                             INSERT INTO chamados (id_chamado, solicitante, departamento, categoria, prioridade, status, tecnico, descricao, data_abertura)
                             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
-                        """, (id_chamado, usuario["nome"], departamento, categoria, prioridade, "Aberto", "Não Atribuído", descricao, data_abertura))
+                        """, (id_chamado, solicitante, departamento, categoria, prioridade, "Aberto", "Não Atribuído", descricao, data_abertura))
     
                         conn.commit()
                         cursor.close()
@@ -305,10 +305,11 @@ if aba2 is not None:
                 if st.button("✅ Concluir Chamado", use_container_width=True):
                     try:
                         conn = get_connection()
+                        novo_tecnico = st.text_input("Técnico Responsável", value=usuario["nome"])
                         cursor = conn.cursor()
                         cursor.execute(
-                            "UPDATE chamados SET status = %s, data_fim = NOW() WHERE id_chamado = %s;",
-                            ("Concluído", id_selecionado)
+                            "UPDATE chamados SET status = %s, data_fim = NOW(), tecnico = %s WHERE id_chamado = %s;",
+                            ("Concluído", novo_tecnico, id_selecionado)
                         )
                         conn.commit()
                         cursor.close()
